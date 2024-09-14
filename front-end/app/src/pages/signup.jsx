@@ -6,7 +6,6 @@ const Signup = () => {
   const [username,setName] = useState("")
   const [email,setEmail] = useState("")
   const [password,setPassword] = useState("")
-  console.log(username)
   const handleSubmit = async() => {
     const response = await fetch('http://localhost:5555/signup', {
       method: 'POST',
@@ -43,8 +42,8 @@ const Signup = () => {
           <label>Confirm Password</label>
         </div> */}
         <div className='a-tag'>
-          <button type='submit'>Signup</button>
-          <Link to={'/login'}><p href="">Already have an account ? </p></Link>
+        <button type='submit'>Signup</button>
+        <Link to={'/login'}><p href="">Already have an account ? </p></Link>
         </div>
       </form>
     </div>

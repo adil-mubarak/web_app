@@ -244,7 +244,6 @@ func signup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		
 		var existingUser User
 		if db.Where("username = ? OR email = ?", userDetails.Username, userDetails.Email).First(&existingUser).Error == nil {
 			w.Header().Set("Content-Type", "application/json")
@@ -282,6 +281,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		var credentials struct {
 			Username string `json:"username"`
+			Email    string `json:"email"`
 			Password string `json:"password"`
 		}
 
@@ -292,13 +292,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var user User
-		result := db.Where("username = ? or email = ?", credentials.Username, credentials.Username).First(&user)
+		query := db.Where("username = ? OR email = ?", credentials.Username, credentials.Email)
+
+		
+		result := query.First(&user)
 		if result.Error != nil {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{"message": "Invalid username or password"})
 			return
 		}
 
+		
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
@@ -306,15 +310,18 @@ func login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		
 		session, _ := store.Get(r, "session_id")
 		session.Values["authenticated"] = true
 		session.Values["isAdmin"] = user.IsAdmin
 		session.Save(r, w)
 
+		
 		response := map[string]string{
 			"message": "Login successful!",
 		}
 
+		
 		if user.IsAdmin {
 			response["redirect"] = "/admin"
 		} else {
